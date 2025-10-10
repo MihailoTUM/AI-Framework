@@ -102,22 +102,140 @@ class Tensor {
             }
         };
 
-        //
-        // Tensor sum(int axis = 0);
-        // Tensor mean(int axis = 0);
+        // addition & subtraction of Tensors -> returns new Tensor
+        Tensor operator +(const Tensor& other) const {
+            if(rows == other.rows && cols == other.cols) {
+                Tensor g(rows, cols);
+                for(int i = 0; i < rows; i++) {
+                    for(int j = 0; j < cols; j++) {
+                        g.fill(i, j, matrix[i * cols + j] + other.matrix[i * cols + j]);
+                    }
+                }
+                return g;
+            } else {
+                return Tensor(0, 0);
+            };
+        }
+        Tensor operator -(const Tensor& other) const {
+            if(rows == other.rows && cols == other.cols) {
+                Tensor g(rows, cols);
+                for(int i = 0; i < rows; i++) {
+                    for(int j = 0; j < cols; j++) {
+                        g.fill(i, j, matrix[i * cols + j] - other.matrix[i * cols + j]);
+                    }
+                }
+                return g;
+            } else {
+                return Tensor(0, 0);
+            }; 
+        }
 
-        // // negates the existing Tensor
-        // Tensor operator -() const;
+        // scalar multiplication
+        Tensor operator *(T scalar) const {
+            Tensor g(rows, cols);
+            for(int i = 0; i < rows; i++) {
+                for(int j = 0; j < cols; j++) {
+                    g.fill(i, j, scalar * matrix[i * cols + j]);
+                }
+            }
+            return g;
+        }
 
-        // // addition & subtraction of Tensors -> returns new Tensor
-        // Tensor operator +(const Tensor& other) const;
-        // Tensor operator -(const Tensor& other) const;
+        // matrix multiplication 
+        Tensor operator *(const Tensor& other) const {
+            if(cols == other.rows) {
+            Tensor g(rows, other.cols);
+                for(int x = 0; x < rows; x++) {
+                    for(int y = 0; y < other.cols; y++) {
+                        float value = 0;
+                        for(int k = 0; k < cols; k++) {
+                            value += matrix[cols * x + k] * other.matrix[other.cols * k + y];
+                        }
+                        g.fill(x, y, value);
+                    }
+                }
+                return g;
+            }
+            else {
+                return Tensor(0, 0);
+            }
+        }
 
-        // // matrix multiplication 
-        // Tensor operator *(const Tensor& other) const;
+        // negates the existing Tensor
+        Tensor operator -() const {
+            Tensor g(rows, cols);
+            for(int i = 0; i < rows; i++) {
+                for(int j = 0; j < cols; j++) {
+                    g.fill(i, j, -matrix[i * cols + j]);
+                }
+            }
+            return g;
+        }
+        
+        Tensor sum(int axis = 0) {
+            if(axis == 0) {
+                // (2, 3) -> (1, 3) (column-wise)
+                Tensor g(1, this->cols);
+                for(int k = 0; k < this->cols; k++) {
+                    T sum = 0;
+                    for(int i = 0; i < this->rows; i++) {
+                        sum += this->matrix[i * this->cols + k];
+                    }
+                    g.fill(0, k, sum);
+                }
 
-        // // scalar multiplication
-        // Tensor operator *(float scalar) const;
+                return g;
+
+            }   
+            else if (axis == 1) {
+                // (2, 3) -> (2, 1) (row-wise)
+                Tensor g(this->rows, 1);
+                for(int k = 0; k < this->rows; k++) {
+                    T sum = 0;
+                    for(int i = 0; i < this->cols; i++) {
+                        sum += this->matrix[k * this->cols + i];
+                    }
+                    g.fill(k, 0, sum);
+                }
+                return g;
+            }
+            else {
+                throw std::invalid_argument("Axis either 0 or 1");
+            }
+        }
+        
+        Tensor mean(int axis = 0) {
+                // (2, 3) -> (1, 3) (column-wise)
+            if(axis == 0){ 
+                Tensor g(1, this->cols);
+                for(int k = 0; k < this->cols; k++) {
+                    T sum = 0;
+                    for(int i = 0; i < this->rows; i++) {
+                        sum += this->matrix[i * this->cols + k];
+                    }
+                    sum = static_cast<T>(sum / this->rows);
+                    g.fill(0, k, sum);
+                }
+
+                return g;
+            }
+            else if (axis == 1) {
+                // (2, 3) -> (2, 1) (row-wise)
+                Tensor g(this->rows, 1);
+                for(int k = 0; k < this->rows; k++) {
+                    T sum = 0;
+                    for(int i = 0; i < this->cols; i++) {
+                        sum += this->matrix[k * this->cols + i];
+                    }
+                    sum = static_cast<T>(sum / this->cols);
+                    g.fill(k, 0, sum);
+                }
+                return g;
+            }
+            else {
+                throw std::invalid_argument("Axis either 0 or 1");
+            }
+        }
 
 };
 

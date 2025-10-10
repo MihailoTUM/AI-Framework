@@ -65,7 +65,12 @@
     "span": "cpp",
     "string": "cpp",
     "string_view": "cpp",
-    "text_encoding": "cpp"
+    "text_encoding": "cpp",
+    "deque": "cpp",
+    "memory_resource": "cpp",
+    "queue": "cpp",
+    "ranges": "cpp",
+    "variant": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",
