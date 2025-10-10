@@ -82,14 +82,16 @@ class Tensor {
 
         template <typename P>
         void fill(int row, int col, P value) {
+            if(row >= this->rows || col >= this->cols) {
+                throw std::invalid_argument("Out of bounds for either row or col");
+            }
             matrix[row * cols + col] = value;
         }
 
         T get(int row, int col) {
-            if(row > this->rows || col > this->cols) {
-                throw std::invalid_argument("Row > rows || Col > cols"); 
+            if(row >= this->rows || col >= this->cols) {
+                throw std::invalid_argument("Out of bounds for either row or col"); 
             }
-
             return this->matrix[row * this->cols + col];
         };
 
@@ -112,8 +114,17 @@ class Tensor {
                     }
                 }
                 return g;
-            } else {
-                return Tensor(0, 0);
+            } 
+            else if (this->cols == other.cols && other.rows == 1) {
+                Tensor g(rows, cols);
+                for(int i = 0; i < rows; i++) {
+                    for(int j = 0; j < cols; j++) {
+                        g.fill(i, j, matrix[i * cols + j] + other.matrix[j]);
+                    }
+                }
+            }
+            else {
+                throw std::invalid_argument("Invalid dimensions for addition");
             };
         }
         Tensor operator -(const Tensor& other) const {
@@ -126,7 +137,7 @@ class Tensor {
                 }
                 return g;
             } else {
-                return Tensor(0, 0);
+                throw std::invalid_argument("Invalid dimensions for subtraction");
             }; 
         }
 
@@ -157,7 +168,7 @@ class Tensor {
                 return g;
             }
             else {
-                return Tensor(0, 0);
+                throw std::invalid_argument("Invalid dimensions for matrix multiplication");
             }
         }
 
@@ -200,7 +211,7 @@ class Tensor {
                 return g;
             }
             else {
-                throw std::invalid_argument("Axis either 0 or 1");
+                throw std::invalid_argument("Invalid axis provided. Axis can only be 0 or 1");
             }
         }
         
@@ -233,9 +244,22 @@ class Tensor {
                 return g;
             }
             else {
-                throw std::invalid_argument("Axis either 0 or 1");
+                throw std::invalid_argument("Invalid axis provided. Axis can only be 0 or 1");
             }
         }
+
+        Tensor transpose() const {
+            // (2, 3) -> (3, 2)
+            Tensor g(this->cols, this->rows);
+
+            for(int i = 0; i < this->rows; i++) {
+                for(int k = 0; k < this->cols; k++) {
+                    g.fill(k, i, this->matrix[i * cols + k]);
+                }
+            }
+
+            return g;
+        };
 
 };
 

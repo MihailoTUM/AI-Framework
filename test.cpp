@@ -205,6 +205,21 @@ void test_mean() {
     std::cout << "Success for sum axis = 1" << std::endl;
 };
 
+void test_transpose() {
+    int i_array[6] = { 1, 2, 4, 0, -1, 2 };
+    Tensor<int> tInt(3, 2, "CPU", i_array);
+    tInt.print();
+
+    std::cout << "" << std::endl;
+
+    Tensor<int> t = tInt.transpose();
+    t.print();
+}
+
+void test_addition_stretch() {
+    // (10, 5) + (1, 5)
+}
+
 int main() {
     // test_random_init();
     // test_custom_init();
@@ -214,7 +229,8 @@ int main() {
     // test_matrixmultiplication();
     // test_negatematrix();
     // test_sum(); 
-    test_mean();
+    // test_mean();
+    test_transpose();
 
     return 0;
 };
