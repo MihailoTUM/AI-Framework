@@ -27,16 +27,20 @@ class Tensor {
             this->matrix = new T[this->rows * this->cols];
 
             runDependingOnType<T>(
-                [this]() { initFloat(); }
+                [this]() { initFloat(); },
                 [this]() { initInt(); }
             );
 
             runDependingOnType<T>(
-                [this] () { randomFloat(); }
+                [this] () { randomFloat(); },
                 [this] () { randomInt(); }
-            )
+            );
 
-        }
+        };
+
+        Tensor(int nRows, int nCols, std::string nDevice, T*array): Tensor(nRows, nCols, nDevice) {
+            this->matrix = array;
+        };
 
         void initInt() {
             for(int i = 0; i < rows; i++) {
@@ -81,6 +85,14 @@ class Tensor {
             matrix[row * cols + col] = value;
         }
 
+        T get(int row, int col) {
+            if(row > this->rows || col > this->cols) {
+                throw std::invalid_argument("Row > rows || Col > cols"); 
+            }
+
+            return this->matrix[row * this->cols + col];
+        };
+
         void print() const {
             for(int i = 0; i < rows; i++) {
                 for(int j = 0; j < cols; j++) {
@@ -91,21 +103,21 @@ class Tensor {
         };
 
         //
-        Tensor sum(int axis = 0);
-        Tensor mean(int axis = 0);
+        // Tensor sum(int axis = 0);
+        // Tensor mean(int axis = 0);
 
-        // negates the existing Tensor
-        Tensor operator -() const;
+        // // negates the existing Tensor
+        // Tensor operator -() const;
 
-        // addition & subtraction of Tensors -> returns new Tensor
-        Tensor operator +(const Tensor& other) const;
-        Tensor operator -(const Tensor& other) const;
+        // // addition & subtraction of Tensors -> returns new Tensor
+        // Tensor operator +(const Tensor& other) const;
+        // Tensor operator -(const Tensor& other) const;
 
-        // matrix multiplication 
-        Tensor operator *(const Tensor& other) const;
+        // // matrix multiplication 
+        // Tensor operator *(const Tensor& other) const;
 
-        // scalar multiplication
-        Tensor operator *(float scalar) const;
+        // // scalar multiplication
+        // Tensor operator *(float scalar) const;
 
 };
 
