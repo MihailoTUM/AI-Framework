@@ -20,6 +20,8 @@ class Tensor {
         }
 
     public:
+
+
         Tensor(int nRows, int nCols, std::string nDevice = "CPU") {
             this->rows = nRows;
             this->cols = nCols;
@@ -37,6 +39,14 @@ class Tensor {
             );
 
         };
+
+        Tensor(int nRows): Tensor(nRows, 1, "CPU") {
+            this->matrix = new T[this->rows];
+            runDependingOnType<T>(
+                [this]() { initFloat(); },
+                [this]() { initInt(); }
+            );
+        }
 
         Tensor(int nRows, int nCols, std::string nDevice, T*array): Tensor(nRows, nCols, nDevice) {
             this->matrix = array;
@@ -122,6 +132,7 @@ class Tensor {
                         g.fill(i, j, matrix[i * cols + j] + other.matrix[j]);
                     }
                 }
+                return g;
             }
             else {
                 throw std::invalid_argument("Invalid dimensions for addition");

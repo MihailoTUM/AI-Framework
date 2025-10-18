@@ -217,7 +217,32 @@ void test_transpose() {
 }
 
 void test_addition_stretch() {
-    // (10, 5) + (1, 5)
+    // (2, 3) + (1, 3)
+    int i_array[6] = { 1, 2, 4, 0, -1, 2 };
+    Tensor<int> tInt(2, 3, "CPU", i_array);
+    tInt.print();
+
+    std::cout << "" << std::endl;
+
+    int array[3] = { 1, -1, 2 };
+    Tensor<int> b (1, 3, "CPU", array);
+    b.print();
+
+    std::cout << "" << std::endl;
+
+    Tensor output = tInt + b;
+    output.print();
+
+    std::cout << "" << std::endl;
+
+    assert(output.get(0, 0) == 2);
+    assert(output.get(1, 2) == 4);
+
+    std::cout << "Successful addition stretch functionality" << std::endl;
+}
+
+void test_dense_layer() {
+    
 }
 
 int main() {
@@ -230,7 +255,8 @@ int main() {
     // test_negatematrix();
     // test_sum(); 
     // test_mean();
-    test_transpose();
+    // test_transpose();
+    // test_addition_stretch();
 
     return 0;
 };
