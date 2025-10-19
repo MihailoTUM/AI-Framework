@@ -204,6 +204,19 @@ class Tensor {
                 }
                 return g;
             }
+
+            else if (rows == other.rows && cols == other.cols) {
+                Tensor g(rows, cols);
+                for(int x = 0; x < rows; x++) {
+                    for(int y = 0; y < cols; y++) {
+                        float value = 0;
+                        value = this->get(x, y) + other.get(x, y);
+                        g.fill(x, y, value);
+                    }
+                }
+                return g;
+            }
+
             else {
                 throw std::invalid_argument("Invalid dimensions for matrix multiplication");
             }

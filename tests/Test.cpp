@@ -1,5 +1,5 @@
-#include "Tensor.hpp"
-#include "DenseLayer.hpp"
+#include "../include/Tensor.hpp"
+// #include "DenseLayer.hpp"
 #include "Activation.hpp"
 #include <iostream>
 #include <cassert>
@@ -243,51 +243,55 @@ void test_addition_stretch() {
     std::cout << "Successful addition stretch functionality" << std::endl;
 }
 
-void test_dense_layer() {
-    std::cout << "Input (1, 4)" << std::endl;
-    Tensor<int> tensor(1, 4, "CPU");
-    tensor.print();
+// void test_dense_layer() {
+//     std::cout << "Input (1, 4)" << std::endl;
+//     Tensor<int> tensor(1, 4, "CPU");
+//     tensor.print();
 
-    std::cout << "\nWeights (1, 2)" << std::endl;
+//     std::cout << "\nWeights (1, 2)" << std::endl;
 
-    DenseLayer<int> layer(4, 2);
-    layer.get_weights().print();
+//     DenseLayer<int> layer(4, 2);
+//     layer.get_weights().print();
 
-    std::cout << "\nBias (1, 2)" << std::endl;
+//     std::cout << "\nBias (1, 2)" << std::endl;
 
-    layer.get_bias().print();
+//     layer.get_bias().print();
 
-    std::cout << "\nOuput (1, 2)" << std::endl;
+//     std::cout << "\nOuput (1, 2)" << std::endl;
 
-    Tensor<int> output = layer.forward(tensor);
-    output.print();
-}
+//     Tensor<int> output = layer.forward(tensor);
+//     output.print();
+// }
 
-void test_activation_layer() {
-    std::cout << "Input (1, 4)" << std::endl;
-    Tensor<float> tensor(1, 4, "CPU");
-    tensor.print();
+// void test_activation_layer() {
+//     std::cout << "Input (1, 4)" << std::endl;
+//     Tensor<float> tensor(1, 4, "CPU");
+//     tensor.print();
 
-    std::cout << "\nWeights (1, 2)" << std::endl;
+//     std::cout << "\nWeights (1, 2)" << std::endl;
 
-    DenseLayer<float> layer(4, 2);
-    layer.get_weights().print();
+//     DenseLayer<float> layer(4, 2);
+//     layer.get_weights().print();
 
-    std::cout << "\nBias (1, 2)" << std::endl;
+//     std::cout << "\nBias (1, 2)" << std::endl;
 
-    layer.get_bias().print();
+//     layer.get_bias().print();
 
-    std::cout << "\nOuput (1, 2)" << std::endl;
+//     std::cout << "\nOuput (1, 2)" << std::endl;
 
-    Tensor<float> output = layer.forward(tensor);
-    output.print();
+//     Tensor<float> output = layer.forward(tensor);
+//     output.print();
 
-    std::cout << "\nRELU output" << std::endl;
+//     std::cout << "\nRELU output" << std::endl;
 
-    Activation<float> activation("RELU");
-    Tensor<float> out = activation.forward(output);
-    out.print();
-}
+//     Activation<float> activation("RELU");
+//     Tensor<float> out = activation.forward(output);
+//     out.print();
+// }
+
+void element_wise_matmul() {
+
+};
 
 int main() {
     // test_random_init();
@@ -302,7 +306,8 @@ int main() {
     // test_transpose();
     // test_addition_stretch();
     // test_dense_layer();
-    test_activation_layer();
+    // test_activation_layer();
+    element_wise_matmul();
 
     return 0;
 };
