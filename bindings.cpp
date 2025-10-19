@@ -10,5 +10,8 @@ PYBIND11_MODULE(mikideeplib, m) {
 
     py::class_<Tensor<float>>(m, "TensorFloat")
         .def(py::init<int, int, std::string>())
-        .def("print", &Tensor<float>::print);
+        .def("print", &Tensor<float>::print)
+        .def("getRows", &Tensor<float>::getRows)
+        .def("getCols", &Tensor<float>::getCols)
+        .def("getMatrix", &Tensor<float>::getMatrix);
 }
