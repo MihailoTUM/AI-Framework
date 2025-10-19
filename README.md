@@ -26,7 +26,8 @@ You can use the Tensor library in python for your own machine learning algorithm
 - numpy array (python lists are not allowed): Optional
 
 ### Init
+```
 import mikideeplib as mk
 
 tensor = mk.TensorFloat(3, 3, "CPU")
-
+```
