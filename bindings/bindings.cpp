@@ -35,4 +35,9 @@ PYBIND11_MODULE(mikideeplib, m) {
                 t.getMatrix()
             );
         });
+
+    py::class_<Activation<float>>(m, "Activation")
+        .def(py::init<std::string>())
+        .def("forward", &Activation<float>::forward)
+        .def("relu", (Tensor<float> (Activation<float>::*)(const Tensor<float>&) const) &Activation<float>::relu);
 }

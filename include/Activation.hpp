@@ -8,7 +8,6 @@ template <typename T>
 class Activation {
     private: 
         std::string type; 
-
     public:
 
     Activation(std::string nType = "RELU") {
