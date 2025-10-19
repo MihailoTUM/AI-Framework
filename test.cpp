@@ -1,4 +1,6 @@
 #include "Tensor.hpp"
+#include "DenseLayer.hpp"
+#include "Activation.hpp"
 #include <iostream>
 #include <cassert>
 
@@ -242,7 +244,49 @@ void test_addition_stretch() {
 }
 
 void test_dense_layer() {
-    
+    std::cout << "Input (1, 4)" << std::endl;
+    Tensor<int> tensor(1, 4, "CPU");
+    tensor.print();
+
+    std::cout << "\nWeights (1, 2)" << std::endl;
+
+    DenseLayer<int> layer(4, 2);
+    layer.get_weights().print();
+
+    std::cout << "\nBias (1, 2)" << std::endl;
+
+    layer.get_bias().print();
+
+    std::cout << "\nOuput (1, 2)" << std::endl;
+
+    Tensor<int> output = layer.forward(tensor);
+    output.print();
+}
+
+void test_activation_layer() {
+    std::cout << "Input (1, 4)" << std::endl;
+    Tensor<float> tensor(1, 4, "CPU");
+    tensor.print();
+
+    std::cout << "\nWeights (1, 2)" << std::endl;
+
+    DenseLayer<float> layer(4, 2);
+    layer.get_weights().print();
+
+    std::cout << "\nBias (1, 2)" << std::endl;
+
+    layer.get_bias().print();
+
+    std::cout << "\nOuput (1, 2)" << std::endl;
+
+    Tensor<float> output = layer.forward(tensor);
+    output.print();
+
+    std::cout << "\nRELU output" << std::endl;
+
+    Activation<float> activation("RELU");
+    Tensor<float> out = activation.forward(output);
+    out.print();
 }
 
 int main() {
@@ -257,6 +301,8 @@ int main() {
     // test_mean();
     // test_transpose();
     // test_addition_stretch();
+    // test_dense_layer();
+    test_activation_layer();
 
     return 0;
 };

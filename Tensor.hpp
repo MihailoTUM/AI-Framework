@@ -52,6 +52,18 @@ class Tensor {
             this->matrix = array;
         };
 
+        int getRows() const {
+            return rows;
+        }
+
+        int getCols() const {
+            return cols;
+        }
+
+        T* getMatrix() const {
+            return matrix;
+        }
+
         void initInt() {
             for(int i = 0; i < rows; i++) {
                 for(int j = 0; j < cols; j++) {
@@ -98,7 +110,7 @@ class Tensor {
             matrix[row * cols + col] = value;
         }
 
-        T get(int row, int col) {
+        T get(int row, int col) const {
             if(row >= this->rows || col >= this->cols) {
                 throw std::invalid_argument("Out of bounds for either row or col"); 
             }

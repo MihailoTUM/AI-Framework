@@ -9,34 +9,37 @@ class Activation {
     private: 
         std::string type; 
 
+    public:
+
     Activation(std::string nType = "RELU") {
         type = nType;
     }
 
-    Tensor forward(const Tensor output&) const {
+    Tensor<T> forward(const Tensor<T>& output) const {
         if(type == "RELU") {
             return relu(output);
         }
         return output;
     };
 
-    Tensor relu(Tensor output&) const {
-        for(int i = 0; i < output.rows; i++) {
-            for(int j = 0; j < output.cols; j++) {
+    Tensor<T> relu(const Tensor<T>& output) const {
+        Tensor<T> local(output.getRows(), output.getCols(), "CPU", output.getMatrix());
+        for(int i = 0; i < output.getRows(); i++) {
+            for(int j = 0; j < output.getCols(); j++) {
                 if(output.get(i, j) < 0) {
-                    output.fill(i, j, 0);
+                    local.fill(i, j, 0);
                 }
             }
         }
-        return output;
+        return local;
     }
 
-    Tensor sigmoid(Tensor output&) const {
-    }
+    // Tensor sigmoid(Tensor output&) const {
+    // }
 
-    Tensor tanh(Tensor output&) const {
+    // Tensor tanh(Tensor output&) const {
 
-    };
+    // };
 };
 
 #endif
