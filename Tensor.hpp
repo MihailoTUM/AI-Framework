@@ -4,6 +4,10 @@
 #include <iostream>
 #include <string>
 #include <random>
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h> 
+
+namespace py = pybind11;
 
 template <typename T>
 class Tensor {
@@ -12,6 +16,7 @@ class Tensor {
         int rows;
         int cols;
         std::string device;
+        py::array_t<T> py_array_ref;
 
         template <typename U, typename F, typename G>
         static void runDependingOnType(F f, G g) {
@@ -20,8 +25,6 @@ class Tensor {
         }
 
     public:
-
-
         Tensor(int nRows, int nCols, std::string nDevice = "CPU") {
             this->rows = nRows;
             this->cols = nCols;
@@ -51,6 +54,17 @@ class Tensor {
         Tensor(int nRows, int nCols, std::string nDevice, T*array): Tensor(nRows, nCols, nDevice) {
             this->matrix = array;
         };
+
+        Tensor(int nRows, int nCols, std::string nDevice, py::array_t<T> arr): Tensor(nRows, nCols, nDevice) {
+            auto buf = arr.request();
+
+            if(buf.size != nRows * nCols) {
+                throw std::runtime_error("Size mismatch");
+            }
+
+            this->matrix = static_cast<T*>(buf.ptr);
+            this->py_array_ref = arr;
+        }
 
         int getRows() const {
             return rows;
