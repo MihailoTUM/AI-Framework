@@ -10,6 +10,21 @@ __global__ void addMatrixGPU(float* A, float* B, float* C, int rows, int cols) {
     };
 }
 
+__global__ void matmulGPU(float *A, float *B, float * C, int nA, int nB, int nC) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = idx / nC;
+    int j = idx % nC;
+
+    int size = nA * nC;
+    if (idx < size) {
+        float sum = 0.0f;
+        for(int run = 0; run < nB; run++) {
+            sum += A[run + i * nB] * B[run * nC + j];
+        }
+        C[i * nC + j] = sum;
+    };
+};
+
 class Tensor {
     private:
         float* matrix;
@@ -79,11 +94,23 @@ class Tensor {
     }
 
 
-    void addMatrixCPU(float * A, float *B, float *C, int rows, int cols) const {
+    void addMatrixCPU(float *A, float *B, float *C, int rows, int cols) const {
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < cols; j++) {
                 C[i * cols + j] = A[i * cols + j] + B[i * cols + j];
             }
+        }
+    }
+
+    void matmulCPU(float *A, float* B, float *C, int rows, int mix, int cols) const {
+        for(int x = 0; x < rows; x++) {
+            for(int y = 0; y < cols; y++) {
+                float value = 0;
+                    for(int k = 0; k < cols; k++) {
+                        value += A[cols * x + k] * B[cols * k + y];
+                    }
+                C[x * cols + y] = value;
+            }     
         }
     }
 
