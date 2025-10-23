@@ -12,11 +12,12 @@ __global__ void addMatrixGPU(float* A, float* B, float* C, int rows, int cols) {
 }
 
 __global__ void matmulGPU(float *A, float *B, float * C, int nA, int nB, int nC) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int size = nA * nC; // amout of operations
+    int idx = blockIdx.x * blockDim.x + threadIdx.x; // #size different threads
     int i = idx / nC;
     int j = idx % nC;
 
-    int size = nA * nC;
+
     if (idx < size) {
         float sum = 0.0f;
         for(int run = 0; run < nB; run++) {
@@ -474,36 +475,53 @@ class Tensor {
         return t * scalar;
     }
 
-int main() {
+// int main() {
 
-    Tensor a (3, 2, 'G', true);
+//     Tensor a (3, 2, 'G', true);
+//     a.print();
+//     std::cout << "\n";
+
+//     // Tensor b(2, 6, 'G', true);
+//     // b.print();
+//     // std::cout << "\n";
+
+//     // float scalar = 10.0f;
+
+//     // Tensor c = scalar * a;
+//     // c.print();
+
+//     // std::cout << "\n";
+
+//     // Tensor sum = b.sum(0);
+//     // sum.print();
+
+//     // std::cout << "\n";
+
+//     // Tensor mean = b.mean(0);
+//     // mean.print();
+
+//     // Tensor sumA = a.sum(1);
+//     // sumA.print();
+
+//     Tensor transpose = a.transpose();
+//     transpose.print();
+
+//     return 0;
+// }
+
+int main() {
+    Tensor a (2, 3, 'G', true);
     a.print();
+
     std::cout << "\n";
 
-    // Tensor b(2, 6, 'G', true);
-    // b.print();
-    // std::cout << "\n";
+    Tensor b (3, 3, 'G', true);
+    b.print();
 
-    // float scalar = 10.0f;
+    std::cout << "\n";
 
-    // Tensor c = scalar * a;
-    // c.print();
-
-    // std::cout << "\n";
-
-    // Tensor sum = b.sum(0);
-    // sum.print();
-
-    // std::cout << "\n";
-
-    // Tensor mean = b.mean(0);
-    // mean.print();
-
-    // Tensor sumA = a.sum(1);
-    // sumA.print();
-
-    Tensor transpose = a.transpose();
-    transpose.print();
+    Tensor c = a * b;
+    c.print();
 
     return 0;
 }
