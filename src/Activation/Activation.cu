@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Tensor.cu"
+#include "Activation.h"
 #include <math.h>
 
 __global__ void reluGPU(float *A, float *C, int rows, int cols) {
@@ -33,61 +34,57 @@ __global__ void tanhGPU(float *A, float *C, int rows, int cols) {
     }
 };
 
+Activation:: Activation(char nFunction = 'R') {
+    function = nFunction;
+};
 
-class Activation {
-    private:
-        char function;
-    
-    public:
-    Activation(char func = 'R') {
-        function = func;
-    }
+char Activation::getFunction() const {
+    return function;
+}
 
-    char getFunction() { return function; };
-
-    void reluCPU (float *A, int rows, int cols) {
+void Activation::reluCPU (float *A, float *C, int rows, int cols) {
         for(int i = 0; i < rows * cols; i++) {
             if(A[i] < 0) {
-                A[i] = 0;
+                C[i] = 0;
             };
         };
     };
 
-    float sigmoid(float input) {
+float Activation::sigmoid(float input) {
         return 1/(1 + exp(-input));
     }
 
-    void sigmoidCPU (float* A, float* C, int rows, int cols) {
+void Activation::sigmoidCPU (float* A, float* C, int rows, int cols) {
         for(int i = 0; i < rows * cols; i++) {
             C[i] = sigmoid(A[i]);
         }
     }
 
-    float tanh(float input) {
+float Activation::tanh(float input) {
         return tanh(input);
     };
 
-    void tanhCPU (float *A, float *C, int rows, int cols) {
+void Activation::tanhCPU (float *A, float *C, int rows, int cols) {
         for(int i = 0; i < rows * cols; i++) {
             C[i] = tanh(A[i]);
         };
     };
 
-    Tensor forward(const Tensor& other) {
+Tensor Activation::forward(const Tensor& other) {
         if(function == 'R') {
             return relu(other);
         }
         return other;
     };
 
-    Tensor relu(const Tensor& input) {
+Tensor Activation::relu(const Tensor& input) {
         int rows = input.getRows();
         int cols = input.getCols();
         Tensor result(rows, cols, input.getDevice(), false);
 
         if(input.getDevice() == 'C') {
             std::cout << "HAPPENS ON CPU" << std::endl;
-            reluCPU(input.getMatrix(), rows, cols);
+            reluCPU(input.getMatrix(), result.getMatrix(), rows, cols);
             return result;
         }   
         else {
@@ -114,7 +111,7 @@ class Activation {
         }   
     };
 
-    Tensor sigmoid(const Tensor& input) {
+Tensor Activation::sigmoid(const Tensor& input) {
         int rows = input.getRows();
         int cols = input.getCols();
         Tensor result(rows, cols, input.getDevice(), false);
@@ -150,7 +147,7 @@ class Activation {
         };
     };
 
-    Tensor tanh(const Tensor& input) {
+Tensor Activation::tanh(const Tensor& input) {
         int rows = input.getRows();
         int cols = input.getCols();
         Tensor result(rows, cols, input.getDevice(), false);
@@ -187,25 +184,3 @@ class Activation {
         }
 
     };
-};
-
-int main() {
-
-    Tensor cuda(3, 3, 'G', true);
-    cuda.print();
-
-    std::cout << "\n";
-
-    Tensor extend = cuda * 10;
-    extend.print();
-
-    std::cout << "\n";
-
-    Activation ac = ('R');
-    Tensor tanh = ac.tanh(extend);
-    tanh.print();
-
-    std::cout << "\n";
-
-    return 0;
-}
