@@ -30,7 +30,7 @@ class Tensor {
         void initMatrixRandom();
 
         // print
-        void print();
+        void print() const;
 
         // matrix operations CPU-based
         void addMatrixCPU(float* A, float *B, float *C, int rows, int cols) const;
@@ -48,6 +48,8 @@ class Tensor {
         Tensor mean(int axis = 0) const;
         Tensor transpose();
 };
+
+    Tensor operator*(float scalar, const Tensor& t);
 
         // matrix operations GPU-based
 __global__ void addMatrixGPU(float* A, float *B, float *C, int rows, int cols);

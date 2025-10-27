@@ -70,11 +70,71 @@ int matmulTensors() {
     return 1;
 }
 
+int scalarTensor() {
+    Tensor t(3, 3, 'G', true);
+    float scalar = 1.234;
+
+    Tensor output = scalar * t;
+
+    assert(output.getValue(0, 0) == (t.getValue(0, 0) * scalar));
+    assert(output.getValue(1, 2) == (t.getValue(1, 2) * scalar));
+
+    std::cout << "scalarTensor - succesful";
+
+    return 1;
+};
+
+int sumAlongX() {
+    Tensor t(3, 6, 'G', true);
+    Tensor s = t.sum(0);
+
+    float sum = 0;
+    for(int i = 0; i < t.getRows(); i++) {
+         sum += t.getValue(i, 1);
+    };
+
+    assert(s.getValue(0, 1) == sum);
+
+    std::cout << "sumAlongX() - successful";
+    return 1;
+};
+
+int sumAlongY() {
+    Tensor t(3, 6, 'G', true);
+    Tensor s = t.sum(1);
+
+    float sum = 0;
+    for(int i = 0; i < t.getCols(); i++) {
+        sum += t.getValue(1, i);
+    }
+
+    assert(s.getValue(0, 1) == sum);
+
+    std::cout << "sumAlongY() - successful";
+    return 1;
+}
+
+int transpose() {
+    Tensor t(2, 3, 'G', true);
+
+    // transposed (3, 2)
+    Tensor tranpose = t.transpose();
+
+    assert(t.getValue(1, 2) == tranpose.getValue(2, 1));
+    std::cout << "transpose() - successful";
+
+    return 1;
+}
+
 int main() {
     // initTensor();
     // addTensors();
     // addBroadcastTensors();
-    matmulTensors();
+    // matmulTensors();
+    // scalarTensor();
+    // sumAlongX();
+    // sumAlongY();
+    transpose();
     
     return 0;
 }

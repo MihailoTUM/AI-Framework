@@ -9,7 +9,7 @@ class Activation {
         char function;
 
     public:
-    Activation(char nFunction = 'R');
+    Activation(char nFunction);
 
     // getters
     char getFunction() const;
@@ -21,7 +21,6 @@ class Activation {
     float sigmoid(float input);
 
     void tanhCPU(float *A, float *C, int rows, int cols);
-    float tanh(float input);
 
     Tensor forward(const Tensor& input);
     Tensor relu(const Tensor& input);

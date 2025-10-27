@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Tensor.cu"
+#include "../Tensor/Tensor.h"
 #include "Activation.h"
 #include <math.h>
 
@@ -34,7 +34,7 @@ __global__ void tanhGPU(float *A, float *C, int rows, int cols) {
     }
 };
 
-Activation:: Activation(char nFunction = 'R') {
+Activation::Activation(char nFunction) {
     function = nFunction;
 };
 
@@ -60,19 +60,21 @@ void Activation::sigmoidCPU (float* A, float* C, int rows, int cols) {
         }
     }
 
-float Activation::tanh(float input) {
-        return tanh(input);
-    };
-
 void Activation::tanhCPU (float *A, float *C, int rows, int cols) {
         for(int i = 0; i < rows * cols; i++) {
-            C[i] = tanh(A[i]);
+            C[i] = tanhf(A[i]);
         };
     };
 
 Tensor Activation::forward(const Tensor& other) {
         if(function == 'R') {
             return relu(other);
+        }
+        else if (function == 'S') {
+            return sigmoid(other);
+        }
+        else if (function == 'T') {
+            return tanh(other);
         }
         return other;
     };
