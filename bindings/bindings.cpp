@@ -13,7 +13,7 @@ PYBIND11_MODULE(TUM, m) {
         .def("getRows", &Tensor::getRows)
         .def("getCols", &Tensor::getCols)
         .def("getValue", &Tensor::getValue)
-        .def("setValue", &Tensor:setValue)
+        .def("setValue", &Tensor::setValue)
         .def("__add__", &Tensor::operator+)
         .def("__matmul__", py::overload_cast<const Tensor&>(&Tensor::operator*, py::const_))
         .def("__mul__", py::overload_cast<float>(&Tensor::operator*, py::const_));
