@@ -193,8 +193,9 @@ void Tensor::addBroadcastCPU(float *A, float *B, float* C, int rows, int cols) c
     };
 
 Tensor Tensor::operator+(const Tensor& other) const {
-        // allow broadcasting
         if(rows == other.rows && cols == other.cols) {
+            // same dimensions addition (x, y) + (x, y)
+
             if(device == other.device) {
                 Tensor result(rows, cols, device, false);
                 if(device == 'C') {

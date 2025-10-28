@@ -6,7 +6,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(TUM, m) {
+PYBIND11_MODULE(my_module, m) {
     py::class_<Tensor>(m, "Tensor")
         .def(py::init<int, int, char, bool>(), py::arg("rows"), py::arg("cols"), py::arg("device")='C', py::arg("random")=true)
         .def("print", &Tensor::print)

@@ -2,26 +2,55 @@
 #include <cassert>
 #include <iostream>
 
-int initTensor() {
-    Tensor tensor(3, 3, 'G', true);
-    tensor.print();
+Tensor initTensor(int n_input, int n_output, char device) {
+    Tensor tensor(n_input, n_output, device, true);
+    return tensor;
+}
 
-    assert(true);
+int initTensorTest() {
+    Tensor CPU = initTensor(3, 3, 'C');
+    Tensor GPU = initTensor(3, 3, 'G');
+
     std::cout << "initTensor() - successful";
-
     return 1;
 }
 
-int addTensors() {
+int addTensorsTest() {
     int correct = 0;
 
-    Tensor t1(3, 3, 'G', true);
-    Tensor t2(3, 3, 'G', true);
-    Tensor result = t1 + t2;
+    Tensor CPU_1 = initTensor(3, 3, 'C');
+    Tensor CPU_2 = initTensor(3, 3, 'C');
+    Tensor result = CPU_1 + CPU_2;
+    result.print();
 
-    assert(result.getValue(0, 0) == (t1.getValue(0, 0) + t2.getValue(0, 0)));
-    assert(result.getValue(1, 2) == (t1.getValue(1, 2) + t2.getValue(1, 2)));
+    assert(result.getValue(0, 0) == (CPU_1.getValue(0, 0) + CPU_2.getValue(0, 0)));
+    assert(result.getValue(0, 1) == (CPU_1.getValue(0, 1) + CPU_2.getValue(0, 1)));
+    assert(result.getValue(0, 2) == (CPU_1.getValue(0, 2) + CPU_2.getValue(0, 2)));
+    assert(result.getValue(1, 0) == (CPU_1.getValue(1, 0) + CPU_2.getValue(1, 0)));
+    assert(result.getValue(1, 1) == (CPU_1.getValue(1, 1) + CPU_2.getValue(1, 1)));
+    assert(result.getValue(1, 2) == (CPU_1.getValue(1, 2) + CPU_2.getValue(1, 2)));
+    assert(result.getValue(2, 0) == (CPU_1.getValue(2, 0) + CPU_2.getValue(2, 0)));
+    assert(result.getValue(2, 1) == (CPU_1.getValue(2, 1) + CPU_2.getValue(2, 1)));
+    assert(result.getValue(2, 2) == (CPU_1.getValue(2, 2) + CPU_2.getValue(2, 2)));
     correct++;
+    std::cout << "CPU - successful" << std::endl;
+
+    Tensor GPU_1 = initTensor(3, 3, 'G');
+    Tensor GPU_2 = initTensor(3, 3, 'G');
+    Tensor GPU_result = GPU_1 + GPU_2;
+    GPU_result.print();
+
+    assert(GPU_result.getValue(0, 0) == (GPU_1.getValue(0, 0) + GPU_2.getValue(0, 0)));
+    assert(GPU_result.getValue(0, 1) == (GPU_1.getValue(0, 1) + GPU_2.getValue(0, 1)));
+    assert(GPU_result.getValue(0, 2) == (GPU_1.getValue(0, 2) + GPU_2.getValue(0, 2)));
+    assert(GPU_result.getValue(1, 0) == (GPU_1.getValue(1, 0) + GPU_2.getValue(1, 0)));
+    assert(GPU_result.getValue(1, 1) == (GPU_1.getValue(1, 1) + GPU_2.getValue(1, 1)));
+    assert(GPU_result.getValue(1, 2) == (GPU_1.getValue(1, 2) + GPU_2.getValue(1, 2)));
+    assert(GPU_result.getValue(2, 0) == (GPU_1.getValue(2, 0) + GPU_2.getValue(2, 0)));
+    assert(GPU_result.getValue(2, 1) == (GPU_1.getValue(2, 1) + GPU_2.getValue(2, 1)));
+    assert(GPU_result.getValue(2, 2) == (GPU_1.getValue(2, 2) + GPU_2.getValue(2, 2)));
+    correct++;
+    std::cout << "GPU - successful" << std::endl;
 
     std::cout << "addTensors() - successful";
     return correct;
@@ -128,7 +157,7 @@ int transpose() {
 
 int main() {
     // initTensor();
-    // addTensors();
+    addTensorsTest();
     // addBroadcastTensors();
     // matmulTensors();
     // scalarTensor();
