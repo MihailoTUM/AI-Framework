@@ -3,6 +3,17 @@
 #include <random>
 #include <cuda_runtime.h>
 
+#define CUDA_CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__);}
+inline void gpuAssert(cudaError_t code, const char* file, int line)
+{
+    if(code != cudaSuccess) {
+        std::cerr << "CUDA ERROR: "<< cudaGetErrorString(code)
+            << " at " << file << ":" << line << std::endl;
+            exit(code);
+    }
+}
+
+
 __global__ void addMatrixGPU(float* A, float* B, float* C, int rows, int cols) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int size = rows * cols;
@@ -10,6 +21,15 @@ __global__ void addMatrixGPU(float* A, float* B, float* C, int rows, int cols) {
     if(idx < size) {
         C[idx] = A[idx] + B[idx];
     };
+}
+
+__global__ void addMatrixScalarGPU(float *A, float scalar, float *C, int rows, int cols) {
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    int size = rows * cols;
+
+    if(idx < size) {
+        C[idx] = A[idx] + scalar;
+    }
 }
 
 __global__ void matmulGPU(float *A, float *B, float * C, int nA, int nB, int nC) {
@@ -84,22 +104,33 @@ __global__ void meanGPU(float* A, int axis, float *C, int rows, int cols) {
     };
 };
 
-Tensor::Tensor(int nRows, int nCols, char nDevice, bool random) {
+Tensor::Tensor(int nRows, int nCols, char nDevice) {
     rows = nRows;
     cols = nCols;
     device = nDevice;
-    matrix = new float[rows * cols];
+    matrix = new float[nRows * nCols];
 
-    if(random) {
-        initMatrixRandom();
-    }
-    else {
-        initMatrixToZeros();
-    }
+    initMatrixRandom();
 };
 
 Tensor::~Tensor() {
     delete[] matrix;
+}
+
+void Tensor::toZeros() {
+    for(int i = 0; i < rows * cols; i++) {
+        matrix[i] = 0.0f;
+    }
+}
+
+void Tensor::toOnes() {
+    for(int i = 0; i < rows * cols; i++) {
+        matrix[i] = 1.0f;
+    }
+}
+
+void Tensor::toInt() {
+    intiMatrixRandomInt();
 }
 
 int Tensor::getRows() const {
@@ -114,7 +145,7 @@ float Tensor::getValue(int row, int col) const {
     return matrix[row * cols + col];
 };
 
-float* Tensor::getMatrix() const {
+float* Tensor::getMatrix() const{
     return matrix;
 }
 
@@ -134,8 +165,25 @@ void Tensor::initMatrixToZeros() {
         };
     };
 
-void Tensor::initMatrixRandom() {
+void Tensor::initMatrixToOnes() {
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            setValue(i, j, 1.0f);
+        }
+    }
+}
 
+void Tensor::intiMatrixRandomInt() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(-1, 1);
+
+    for(int i = 0; i < rows * cols; i++) {
+        matrix[i] = dist(gen);
+    }
+}
+
+void Tensor::initMatrixRandom() {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
@@ -154,6 +202,7 @@ void Tensor::print() const {
             };
             std::cout << "\n";
         };
+        std::cout << "\n";
     }
 
 void Tensor::addMatrixCPU(float *A, float *B, float *C, int rows, int cols) const {
@@ -163,6 +212,12 @@ void Tensor::addMatrixCPU(float *A, float *B, float *C, int rows, int cols) cons
             }
         }
     }
+
+void Tensor::addMatrixScalarCPU(float *A, float scalar, float *C, int rows, int cols) const {
+    for(int i = 0; i < rows * cols; i++) {
+        C[i] = A[i] + scalar;
+    }
+}
 
 void Tensor::matmulCPU(float *A, float* B, float *C, int rows, int mix, int cols) const {
         for(int x = 0; x < rows; x++) {
@@ -195,39 +250,41 @@ void Tensor::addBroadcastCPU(float *A, float *B, float* C, int rows, int cols) c
 Tensor Tensor::operator+(const Tensor& other) const {
         if(rows == other.rows && cols == other.cols) {
             // same dimensions addition (x, y) + (x, y)
-
             if(device == other.device) {
-                Tensor result(rows, cols, device, false);
+                Tensor result(rows, cols, device);
                 if(device == 'C') {
-                    std::cout << "HAPPENS ON CPU \n";
                     addMatrixCPU(getMatrix(), other.getMatrix(), result.getMatrix(), rows, cols);
+                    return result;
                 }
                 else if(device == 'G') {
-                    std::cout << "HAPPENS ON GPU \n";
                     size_t size = rows * cols * sizeof(float);
 
                     float *d_A, *d_B, *d_C;
-                    cudaMalloc(&d_A, size);
-                    cudaMalloc(&d_B, size);
-                    cudaMalloc(&d_C, size);
+                    CUDA_CHECK(cudaMalloc(&d_A, size));
+                    CUDA_CHECK(cudaMalloc(&d_B, size));
+                    CUDA_CHECK(cudaMalloc(&d_C, size));
 
-                    cudaMemcpy(d_A, getMatrix(), size, cudaMemcpyHostToDevice);
-                    cudaMemcpy(d_B, other.getMatrix(), size, cudaMemcpyHostToDevice);
-                
+                    CUDA_CHECK(cudaMemcpy(d_A, getMatrix(), size, cudaMemcpyHostToDevice));
+                    CUDA_CHECK(cudaMemcpy(d_B, other.getMatrix(), size, cudaMemcpyHostToDevice));
+
                     int threads = 256;
                     int blocks = (rows * cols + threads - 1)/threads;
-                    addMatrixGPU<<<blocks, threads>>>(d_A, d_B, d_C, other.getRows(), other.getCols());
+                    addMatrixGPU<<<blocks, threads>>>(d_A, d_B, d_C, rows, cols);
+                    
+                    CUDA_CHECK(cudaDeviceSynchronize());
+                    CUDA_CHECK(cudaGetLastError());
 
-                    cudaMemcpy(result.getMatrix(), d_C, size, cudaMemcpyDeviceToHost);
+                    CUDA_CHECK(cudaMemcpy(result.getMatrix(), d_C, size, cudaMemcpyDeviceToHost));
 
-                    cudaFree(d_A);
-                    cudaFree(d_B);
-                    cudaFree(d_C);
+                    CUDA_CHECK(cudaFree(d_A));
+                    CUDA_CHECK(cudaFree(d_B));
+                    CUDA_CHECK(cudaFree(d_C));
+
+                    return result;
                 }
                 else {
                     throw std::invalid_argument("Invalid");
                 };
-                return result;
             }
             else {
                 throw std::invalid_argument("Not on the same device!");
@@ -235,14 +292,12 @@ Tensor Tensor::operator+(const Tensor& other) const {
         }
         else if(cols == other.cols && other.rows == 1) {
             if(getDevice() == other.getDevice()) {
-                Tensor result(rows, cols, getDevice(), false);
+                Tensor result(rows, cols, getDevice());
                 if(device == 'C') {
-                    std::cout << "HAPPENS ON CPU";
                     addBroadcastCPU(getMatrix(), other.getMatrix(), result.getMatrix(), rows, cols);
                     return result;
                 }
                 else if(device == 'G') {
-                    std::cout << "HAPPENS ON GPU \n";
                     size_t sizeA = rows * cols * sizeof(float);
                     size_t sizeB = other.cols * sizeof(float);
 
@@ -267,7 +322,7 @@ Tensor Tensor::operator+(const Tensor& other) const {
                     return result;
                 }   
                 else {
-                    throw std::invalid_argument("Invalid arguments passed!");
+                    throw std::invalid_argument("Invalid device!");
                 }
             }
             else {
@@ -282,7 +337,7 @@ Tensor Tensor::operator+(const Tensor& other) const {
 Tensor Tensor::operator*(const Tensor& other) const {
         if(cols == other.rows) {
             if(device == other.device) {
-                Tensor result(rows, other.cols, device, false);
+                Tensor result(rows, other.cols, device);
                 if(device == 'C') {
                     std::cout << "HAPPENS ON CPU \n";
                     matmulCPU(getMatrix(), other.getMatrix(), result.getMatrix(), rows, cols, other.cols);
@@ -326,13 +381,11 @@ Tensor Tensor::operator*(const Tensor& other) const {
     }
 
 Tensor Tensor::operator* (float scalar) const {
-        Tensor result(getRows(), getCols(), getDevice(), false);
+        Tensor result(getRows(), getCols(), getDevice());
         if(getDevice() == 'C') {
-            std::cout << "HAPPENS ON CPU";
             scalarCPU(getMatrix(), scalar, result.getMatrix(), getRows(), getCols());
         }
         else if(getDevice() == 'G'){
-                std::cout << "HAPPENS ON GPU \n";
                 size_t size = rows * cols * sizeof(float);
 
                 float *d_A, *d_C;
@@ -356,8 +409,38 @@ Tensor Tensor::operator* (float scalar) const {
         return result;
     };
 
+Tensor Tensor::operator+ (float scalar) const {
+    Tensor result(getRows(), getCols(), getDevice());
+    if(getDevice() == 'C') {
+        addMatrixScalarCPU(getMatrix(), scalar, result.getMatrix(), getRows(), getCols());
+        return result;
+    }
+    else if (getDevice() == 'G') {
+        size_t size = rows * cols * sizeof(float);
+
+        float *d_A, *d_C;
+        cudaMalloc(&d_A, size);
+        cudaMalloc(&d_C, size);
+
+        cudaMemcpy(d_A, getMatrix(), size, cudaMemcpyHostToDevice);
+
+        int threads = 256;
+        int blocks = (rows * cols + threads - 1)/ threads;
+        addMatrixScalarGPU<<<blocks, threads>>>(d_A, scalar, d_C, getRows(), getCols());
+
+        cudaMemcpy(result.getMatrix(), d_C, size, cudaMemcpyDeviceToHost);
+
+        cudaFree(d_A);
+        cudaFree(d_C);
+        return result;
+    }   
+    else {
+        throw std::invalid_argument("Invalid device!");
+    }
+}
+
 Tensor Tensor::operator-() const {
-        Tensor result(rows, cols, device, false);
+        Tensor result(rows, cols, getDevice());
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < cols; j++) {
                 result.getMatrix()[i * cols + j] = getValue(i, j);
@@ -368,7 +451,7 @@ Tensor Tensor::operator-() const {
 Tensor Tensor::sum(int axis) const {
         if(axis == 0) {
             if(device == 'C') {
-            Tensor result(1, getCols(), getDevice(), false);
+            Tensor result(1, getCols(), getDevice());
              for(int k = 0; k < this->cols; k++) {
                 float sum = 0;
                 for(int i = 0; i < this->rows; i++) {
@@ -378,7 +461,7 @@ Tensor Tensor::sum(int axis) const {
             }
             return result;
             } else if(device == 'G') {
-                Tensor result(1, getCols(), getDevice(), false);
+                Tensor result(1, getCols(), getDevice());
                 std::cout << "HAPPENS ON GPU \n";
                 size_t sizeA = getRows() * getCols() * sizeof(float);
                 size_t sizeC = getCols() * sizeof(float);
@@ -406,7 +489,7 @@ Tensor Tensor::sum(int axis) const {
         }   
         else if (axis == 1) {
             if(device == 'C') {
-                Tensor result(getRows(), 1, getDevice(), false);
+                Tensor result(getRows(), 1, getDevice());
                 for(int k = 0; k < this->rows; k++) {
                     float sum = 0;
                     for(int i = 0; i < this->cols; i++) {
@@ -417,7 +500,7 @@ Tensor Tensor::sum(int axis) const {
                 return result;
             } 
             else if(device == 'G') {
-                Tensor result(getRows(), 1, getDevice(), false);
+                Tensor result(getRows(), 1, getDevice());
                 std::cout << "HAPPENS ON GPU \n";
                 size_t sizeA = getRows() * getCols() * sizeof(float);
                 size_t sizeC = getRows() * sizeof(float);
@@ -449,7 +532,7 @@ Tensor Tensor::sum(int axis) const {
     };
 Tensor Tensor::mean(int axis) const {
         if(axis == 0) {
-            Tensor result(1, getCols(), getDevice(), false);
+            Tensor result(1, getCols(), getDevice());
              for(int k = 0; k < this->cols; k++) {
                 float sum = 0;
                 for(int i = 0; i < this->rows; i++) {
@@ -460,7 +543,7 @@ Tensor Tensor::mean(int axis) const {
             return result;
         }   
         else if (axis == 1) {
-            Tensor result(getRows(), 1, getDevice(), false);
+            Tensor result(getRows(), 1, getDevice());
             for(int k = 0; k < this->rows; k++) {
                 float sum = 0;
                 for(int i = 0; i < this->cols; i++) {
@@ -475,7 +558,7 @@ Tensor Tensor::mean(int axis) const {
         }
     };
 Tensor Tensor::transpose() {
-    Tensor result(getCols(), getRows(), device, false);
+    Tensor result(getCols(), getRows(), device);
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < cols; j++) {
                 result.getMatrix()[j * rows + i] = matrix[i * cols + j];
@@ -485,4 +568,7 @@ Tensor Tensor::transpose() {
 };
 Tensor operator*(float scalar, const Tensor& t) {
     return t * scalar;
+}
+Tensor operator+(float scalar, const Tensor& t) {
+    return t + scalar;
 }
