@@ -2,6 +2,8 @@
 #include <iostream>
 #include <random>
 #include <cuda_runtime.h>
+#include <thread>
+#include <windows.h>
 
 #define CUDA_CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__);}
 inline void gpuAssert(cudaError_t code, const char* file, int line)
@@ -109,9 +111,19 @@ Tensor::Tensor(int nRows, int nCols, char nDevice) {
     cols = nCols;
     device = nDevice;
     matrix = new float[nRows * nCols];
+    parent1 = nullptr;
+    parent2 = nullptr;
 
     initMatrixRandom();
 };
+
+void Tensor::setParent1(const Tensor *c) {
+    parent1 = c;
+}
+
+void Tensor::setParent2(const Tensor *c) {
+    parent2 = c;
+}
 
 Tensor::~Tensor() {
     delete[] matrix;
@@ -151,6 +163,14 @@ float* Tensor::getMatrix() const{
 
 char Tensor::getDevice() const {
     return device;
+}
+
+const Tensor* Tensor::getParent1() const {
+    return parent1;
+}
+
+const Tensor* Tensor::getParent2() const {
+    return parent2;
 }
 
 void Tensor::setValue(int row, int col, float value) {
@@ -205,6 +225,70 @@ void Tensor::print() const {
         std::cout << "\n";
     }
 
+bool Tensor::checkGPU() const {
+    int deviceCount = 0;
+    cudaError_t err = cudaGetDeviceCount(&deviceCount);
+    if(err != cudaSuccess) {
+        std::cerr << "CUDA error: " << cudaGetErrorString(err) << std::endl;
+        return false;
+    };
+    return true;
+}
+
+void Tensor::printDevice() const {
+    if(getDevice() == 'C') {
+        unsigned int cores = std::thread::hardware_concurrency();
+        std::cout << "CPU Threads: " << cores << "\n" << std::endl;
+
+        #if defined(__WIN32)
+            SYSTEM_INFO siSysInfo;
+            GetSystemInfo(&siSysInfo);
+
+            std::cout << "Platform: Windows\n";
+            std::cout << "Number of processors:" << siSysInfo.dwNumberOfProcessors << "\n" << std::endl;
+        #else 
+            std::cout << "Platform unknown\n" << std::endl;
+
+        #endif
+    }
+    else if (getDevice() == 'G') {
+        if(checkGPU() == false) return;
+
+        int deviceCount = 0;
+        cudaGetDeviceCount(&deviceCount);
+
+        std::cout << "Number of CUDA devices: " << deviceCount << "\n";
+
+        for(int dev = 0; dev < deviceCount; ++dev) {
+            cudaDeviceProp prop;
+            cudaGetDeviceProperties(&prop, dev);
+
+            std::cout << "Device " << dev << ": " << prop.name << "\n";
+            std::cout << "  Compute capability: " << prop.major << "." << prop.minor << "\n";
+            std::cout << "  Total global memory: " << prop.totalGlobalMem / (1024 * 1024) << " MB\n";
+            std::cout << "  Shared memory per block: " << prop.sharedMemPerBlock / 1024 << " KB\n";
+            std::cout << "  Registers per block: " << prop.regsPerBlock << "\n";
+            std::cout << "  Warp size: " << prop.warpSize << "\n";
+            std::cout << "  Max threads per block: " << prop.maxThreadsPerBlock << "\n";
+            std::cout << "  Max threads per dimension: ["
+                  << prop.maxThreadsDim[0] << ", "
+                  << prop.maxThreadsDim[1] << ", "
+                  << prop.maxThreadsDim[2] << "]\n";
+            std::cout << "  Max grid size: ["
+                  << prop.maxGridSize[0] << ", "
+                  << prop.maxGridSize[1] << ", "
+                  << prop.maxGridSize[2] << "]\n";
+            std::cout << "  Clock rate: " << prop.clockRate / 1000.0f << " MHz\n";
+            std::cout << "  Memory pitch: " << prop.memPitch << "\n";
+            std::cout << "  Device overlap: " << prop.deviceOverlap << "\n";
+            std::cout << "  MultiProcessor count: " << prop.multiProcessorCount << "\n\n";
+        };
+    }   
+    else {
+        throw std::invalid_argument("Invalid device!");
+    }
+}
+
 void Tensor::addMatrixCPU(float *A, float *B, float *C, int rows, int cols) const {
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < cols; j++) {
@@ -252,6 +336,9 @@ Tensor Tensor::operator+(const Tensor& other) const {
             // same dimensions addition (x, y) + (x, y)
             if(device == other.device) {
                 Tensor result(rows, cols, device);
+                result.setParent2(&other);
+                result.setParent1(this);
+
                 if(device == 'C') {
                     addMatrixCPU(getMatrix(), other.getMatrix(), result.getMatrix(), rows, cols);
                     return result;
@@ -293,8 +380,12 @@ Tensor Tensor::operator+(const Tensor& other) const {
         else if(cols == other.cols && other.rows == 1) {
             if(getDevice() == other.getDevice()) {
                 Tensor result(rows, cols, getDevice());
+                result.setParent1(this);
+                result.setParent2(&other);
+
                 if(device == 'C') {
                     addBroadcastCPU(getMatrix(), other.getMatrix(), result.getMatrix(), rows, cols);
+
                     return result;
                 }
                 else if(device == 'G') {
@@ -338,12 +429,14 @@ Tensor Tensor::operator*(const Tensor& other) const {
         if(cols == other.rows) {
             if(device == other.device) {
                 Tensor result(rows, other.cols, device);
+                result.setParent1(&other);
+                result.setParent2(this);
+
                 if(device == 'C') {
-                    std::cout << "HAPPENS ON CPU \n";
                     matmulCPU(getMatrix(), other.getMatrix(), result.getMatrix(), rows, cols, other.cols);
+                    return result;
                 }
                 else if(device == 'G') {
-                    std::cout << "HAPPENS ON GPU \n";
                     size_t size_A = rows * cols * sizeof(float);
                     size_t size_B = other.getRows() * other.getCols() * sizeof(float);
                     size_t size_C = rows * getCols() * sizeof(float);
@@ -365,6 +458,8 @@ Tensor Tensor::operator*(const Tensor& other) const {
                     cudaFree(d_A);
                     cudaFree(d_B);
                     cudaFree(d_C);
+                    return result;
+
                 }
                 else {
                     throw std::invalid_argument("Invalid");
@@ -382,8 +477,11 @@ Tensor Tensor::operator*(const Tensor& other) const {
 
 Tensor Tensor::operator* (float scalar) const {
         Tensor result(getRows(), getCols(), getDevice());
+        result.setParent1(this);
+
         if(getDevice() == 'C') {
             scalarCPU(getMatrix(), scalar, result.getMatrix(), getRows(), getCols());
+            return result;
         }
         else if(getDevice() == 'G'){
                 size_t size = rows * cols * sizeof(float);
@@ -402,6 +500,7 @@ Tensor Tensor::operator* (float scalar) const {
 
                 cudaFree(d_A);
                 cudaFree(d_C);
+                return result;
         }
         else {
             throw std::invalid_argument("Invalid arguments!");
@@ -411,6 +510,8 @@ Tensor Tensor::operator* (float scalar) const {
 
 Tensor Tensor::operator+ (float scalar) const {
     Tensor result(getRows(), getCols(), getDevice());
+    result.setParent1(this);
+
     if(getDevice() == 'C') {
         addMatrixScalarCPU(getMatrix(), scalar, result.getMatrix(), getRows(), getCols());
         return result;
@@ -432,6 +533,7 @@ Tensor Tensor::operator+ (float scalar) const {
 
         cudaFree(d_A);
         cudaFree(d_C);
+
         return result;
     }   
     else {
@@ -462,7 +564,6 @@ Tensor Tensor::sum(int axis) const {
             return result;
             } else if(device == 'G') {
                 Tensor result(1, getCols(), getDevice());
-                std::cout << "HAPPENS ON GPU \n";
                 size_t sizeA = getRows() * getCols() * sizeof(float);
                 size_t sizeC = getCols() * sizeof(float);
 

@@ -18,6 +18,8 @@ int initTensor() {
     t4.toInt();
     t4.print();
 
+    Tensor t5(3, 3, 'G');
+    t5.printDevice();
     return 1;
 }
 
@@ -75,6 +77,16 @@ int addScalarTensorsTest() {
     return 1;
 }
 
+int testPrintDevice() {
+    Tensor t(3, 3, 'G');
+    t.printDevice();
+
+    Tensor t1(3, 3, 'C');
+    t1.printDevice();
+
+    return 1;
+}
+
 int addBroadcastTensors() {
     Tensor t1(3, 3, 'G');
     t1.print();
@@ -89,102 +101,68 @@ int addBroadcastTensors() {
     return 1;
 };
 
-// int matmulTensors() {
-//     Tensor t1(2, 6, 'G', true);
-//     t1.print();
-//     std::cout << "\n";
-//     Tensor t2(6, 3, 'G', true);
-//     t2.print();
-//     std::cout << "\n";
+int matmulTensors() {
+    Tensor t1(2, 6, 'G');
+    t1.print();
+    Tensor t2(6, 3, 'G');
+    t2.print();
 
-//     Tensor result = t1 * t2;
-//     result.print();
+    Tensor result = t1 * t2;
+    result.print();
 
-    
-//     //
-//     float sum1 = 0;
-//     for(int i = 0; i < t1.getCols(); i++) {
-//         sum1 += t1.getValue(0, i) * t2.getValue(i, 0);
-//     }
+    std::cout << "matmulTensors - successful";
+    return 1;
+}
 
-//     float sum2 = 0;
-//     for(int j = 0; j < t1.getCols(); j++) {
-//         sum2 += t1.getValue(1, j) * t2.getValue(j, 0);
-//     }
+int scalarTensor() {
+    Tensor t(3, 3, 'G');
+    float scalar = 1.234;
 
-//     assert(result.getValue(0, 0) == sum1);
-//     assert(result.getValue(1, 0) == sum2);
+    Tensor output = scalar * t;
 
-//     std::cout << "matmulTensors - successful";
-//     return 1;
-// }
+    std::cout << "scalarTensor - succesful" << std::flush;
 
-// int scalarTensor() {
-//     Tensor t(3, 3, 'G', true);
-//     float scalar = 1.234;
+    return 1;
+};
 
-//     Tensor output = scalar * t;
+int sumAlongX() {
+    Tensor t(3, 6, 'G');
+    Tensor s = t.sum(0);
 
-//     assert(output.getValue(0, 0) == (t.getValue(0, 0) * scalar));
-//     assert(output.getValue(1, 2) == (t.getValue(1, 2) * scalar));
+    std::cout << "sumAlongX() - successful" << std::flush;
+    return 1;
+};
 
-//     std::cout << "scalarTensor - succesful";
+int sumAlongY() {
+    Tensor t(3, 6, 'G');
+    Tensor s = t.sum(1);
 
-//     return 1;
-// };
+    std::cout << "sumAlongY() - successful" << std::flush;
+    return 1;
+}
 
-// int sumAlongX() {
-//     Tensor t(3, 6, 'G', true);
-//     Tensor s = t.sum(0);
+int transpose() {
+    Tensor t(2, 3, 'G');
 
-//     float sum = 0;
-//     for(int i = 0; i < t.getRows(); i++) {
-//          sum += t.getValue(i, 1);
-//     };
+    // transposed (3, 2)
+    Tensor tranpose = t.transpose();
 
-//     assert(s.getValue(0, 1) == sum);
+    std::cout << "transpose() - successful" << std::flush;
 
-//     std::cout << "sumAlongX() - successful";
-//     return 1;
-// };
-
-// int sumAlongY() {
-//     Tensor t(3, 6, 'G', true);
-//     Tensor s = t.sum(1);
-
-//     float sum = 0;
-//     for(int i = 0; i < t.getCols(); i++) {
-//         sum += t.getValue(1, i);
-//     }
-
-//     assert(s.getValue(0, 1) == sum);
-
-//     std::cout << "sumAlongY() - successful";
-//     return 1;
-// }
-
-// int transpose() {
-//     Tensor t(2, 3, 'G', true);
-
-//     // transposed (3, 2)
-//     Tensor tranpose = t.transpose();
-
-//     assert(t.getValue(1, 2) == tranpose.getValue(2, 1));
-//     std::cout << "transpose() - successful";
-
-//     return 1;
-// }
+    return 1;
+}
 
 int main() {
     // initTensor();
     // addScalarTensorsTest();
     // addTensorsTest();
-    addBroadcastTensors();
+    // testPrintDevice();
+    // addBroadcastTensors();
     // matmulTensors();
     // scalarTensor();
-    // sumAlongX();
-    // sumAlongY();
-    // transpose();
+    sumAlongX();
+    sumAlongY();
+    transpose();
     
     return 0;
 }

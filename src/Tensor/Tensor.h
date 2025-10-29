@@ -8,6 +8,8 @@ class Tensor {
         int rows;
         int cols;
         char device;
+        mutable const Tensor *parent1;
+        mutable const Tensor *parent2;
 
     public: 
         Tensor(int nRows, int nCols, char nDevice);
@@ -21,9 +23,13 @@ class Tensor {
         // getters for tensors
         float* getMatrix() const;
         char getDevice() const;
+        const Tensor*getParent1() const;
+        const Tensor*getParent2() const;
 
         // setters
         void setValue(int row, int cols, float value);
+        void setParent1(const Tensor *c);
+        void setParent2(const Tensor *c);
 
         // init
         void initMatrixToZeros();
@@ -39,6 +45,8 @@ class Tensor {
         // print
         void print() const;
         void printDevice() const;
+
+        bool checkGPU() const;
 
         // matrix operations CPU-based
         void addMatrixCPU(float* A, float *B, float *C, int rows, int cols) const;
