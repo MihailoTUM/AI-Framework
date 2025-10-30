@@ -10,7 +10,7 @@ void Graph::add(const Tensor& input) {
     if(!last) {
         last = &input;
     }
-}
+};
 
 void Graph::traverse() {
     if(!last) return;
@@ -19,9 +19,8 @@ void Graph::traverse() {
 
     recursiveTraverse(pointer, count);
 
-    // breadth first traversal
     std::cout << "#Tensors: " << count << "\n" << std::endl;
-}
+};
 
 void recursiveTraverse(const Tensor* pointer, int& count) {
     if (pointer->getParent1())
