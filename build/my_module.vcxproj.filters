@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="D:\cuda\CUDA\bindings\bindings.cpp">
+    <ClCompile Include="D:\AI-Framework\AI-Framework\bindings\bindings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -11,11 +11,11 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="D:\cuda\CUDA\CMakeLists.txt" />
+    <CustomBuild Include="D:\AI-Framework\AI-Framework\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{140143F4-9126-3890-9B91-F1D8FDD4793A}</UniqueIdentifier>
+      <UniqueIdentifier>{20765D43-CFB1-3B4F-A016-281B718C2B7E}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

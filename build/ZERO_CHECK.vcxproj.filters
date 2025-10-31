@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="D:\cuda\CUDA\build\CMakeFiles\38326e542951dcb09a62146cae91d472\generate.stamp.rule">
+    <CustomBuild Include="D:\AI-Framework\AI-Framework\build\CMakeFiles\69861a591c76f31de0dbab781c26d0db\generate.stamp.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CMake Rules">
-      <UniqueIdentifier>{5996AC67-4812-3D66-B9FC-FE4F0A89614F}</UniqueIdentifier>
+      <UniqueIdentifier>{294A493A-3DFF-38B8-9C80-B45248595934}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

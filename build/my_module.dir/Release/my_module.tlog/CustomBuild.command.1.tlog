@@ -1,6 +1,6 @@
-^D:\CUDA\CUDA\CMAKELISTS.TXT
+^D:\AI-FRAMEWORK\AI-FRAMEWORK\CMAKELISTS.TXT
 setlocal
-"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SD:/cuda/CUDA -BD:/cuda/CUDA/build --check-stamp-file D:/cuda/CUDA/build/CMakeFiles/generate.stamp
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SD:/AI-Framework/AI-Framework -BD:/AI-Framework/AI-Framework/build --check-stamp-file D:/AI-Framework/AI-Framework/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

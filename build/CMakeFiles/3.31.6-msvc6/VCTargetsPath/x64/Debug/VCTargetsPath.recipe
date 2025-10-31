@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\cuda\CUDA\build\CMakeFiles\3.31.6-msvc6\x64\Debug\VCTargetsPath</FullPath>
+      <FullPath>D:\AI-Framework\AI-Framework\build\CMakeFiles\3.31.6-msvc6\x64\Debug\VCTargetsPath</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

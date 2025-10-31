@@ -86,7 +86,6 @@ __global__ void sumGPU(float *A, int axis, float *C, int rows, int cols) {
             //axis == 1;
             atomicAdd(&C[i], A[i * cols + j]);
         }
-    
 }; 
 
 __global__ void meanGPU(float* A, int axis, float *C, int rows, int cols) {

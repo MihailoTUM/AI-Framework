@@ -126,8 +126,8 @@ C:/Users/drini/AppData/Local/Programs/Python/Python311/Lib/site-packages/pybind1
 C:/Users/drini/AppData/Local/Programs/Python/Python311/Lib/site-packages/pybind11/share/cmake/pybind11/pybind11ConfigVersion.cmake
 C:/Users/drini/AppData/Local/Programs/Python/Python311/Lib/site-packages/pybind11/share/cmake/pybind11/pybind11Targets.cmake
 C:/Users/drini/AppData/Local/Programs/Python/Python311/Lib/site-packages/pybind11/share/cmake/pybind11/pybind11Tools.cmake
-D:/cuda/CUDA/CMakeLists.txt
-D:/cuda/CUDA/build/CMakeFiles/3.31.6-msvc6/CMakeCUDACompiler.cmake
-D:/cuda/CUDA/build/CMakeFiles/3.31.6-msvc6/CMakeCXXCompiler.cmake
-D:/cuda/CUDA/build/CMakeFiles/3.31.6-msvc6/CMakeRCCompiler.cmake
-D:/cuda/CUDA/build/CMakeFiles/3.31.6-msvc6/CMakeSystem.cmake
+D:/AI-Framework/AI-Framework/CMakeLists.txt
+D:/AI-Framework/AI-Framework/build/CMakeFiles/3.31.6-msvc6/CMakeCUDACompiler.cmake
+D:/AI-Framework/AI-Framework/build/CMakeFiles/3.31.6-msvc6/CMakeCXXCompiler.cmake
+D:/AI-Framework/AI-Framework/build/CMakeFiles/3.31.6-msvc6/CMakeRCCompiler.cmake
+D:/AI-Framework/AI-Framework/build/CMakeFiles/3.31.6-msvc6/CMakeSystem.cmake

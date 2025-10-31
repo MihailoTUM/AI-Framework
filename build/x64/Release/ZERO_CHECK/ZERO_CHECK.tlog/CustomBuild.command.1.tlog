@@ -1,6 +1,6 @@
-^D:\CUDA\CUDA\BUILD\CMAKEFILES\38326E542951DCB09A62146CAE91D472\GENERATE.STAMP.RULE
+^D:\AI-FRAMEWORK\AI-FRAMEWORK\BUILD\CMAKEFILES\69861A591C76F31DE0DBAB781C26D0DB\GENERATE.STAMP.RULE
 setlocal
-"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SD:/cuda/CUDA -BD:/cuda/CUDA/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/cuda/CUDA/build/MyCUDAProject.sln
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SD:/AI-Framework/AI-Framework -BD:/AI-Framework/AI-Framework/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/AI-Framework/AI-Framework/build/MyCUDAProject.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
